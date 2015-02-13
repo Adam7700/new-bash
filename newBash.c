@@ -9,6 +9,7 @@
 
 int parseString(char*, char*[],char*);
 char strLastChr(char *);
+char strFirstChr(char *);
 
 int main(){
    
@@ -68,14 +69,17 @@ int main(){
                 }
             }
             else if(paramLen > 0 && arr[0] != NULL){
+                int abs_path = 0;
+                if(strFirstChr(arr[0])=='.' || strFirstChr(arr[0])=='/'){
+                    abs_path=1;
+                }
                 if((access(arr[0],F_OK)==0) && (child = fork())==0){
                     //The file exists, we should try to
                     // run it.
                     
-                    printf("Child is now, %d\n",child);
                     execv(arr[0],arr);
                 }
-                else if((access(arr[0],F_OK)!=0) && ((child = fork())== 0)){
+                else if((access(arr[0],F_OK)!=0) && !abs_path && ((child = fork())== 0) ){
                     //The file does not exist, check for it in the path
                     //
                     char *path_arr[20] = {0};
@@ -91,6 +95,7 @@ int main(){
                         if(access(full_path,F_OK)==0){
                             arr[0] = full_path;
                             execv(full_path,arr);
+                            break;
                         }
                     }
                 }
@@ -103,6 +108,10 @@ int main(){
             printf(">>");
         }
     }
+}
+
+char strFirstChr(char *string){
+    return string[0];
 }
 
 char strLastChr(char  *string){
