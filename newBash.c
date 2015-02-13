@@ -19,7 +19,7 @@ int main(){
         fflush(stdin);
         fgets(input,BUFSIZ,stdin);
         int paramLen = 0;
-        pid_t child;
+        pid_t child = -1;
 
         int len;
         len = strlen(input);
@@ -67,14 +67,25 @@ int main(){
                 }
             }
             else if(paramLen > 0 && arr[0] != NULL){
-                if((child = fork())== 0){
-                    int x;
+                if((access(arr[0],F_OK)==0) && (child = fork())==0){
+                    //The file exists, we should try to
+                    // run it.
+                    
+                    printf("Child is now, %d\n",child);
+
                     execv(arr[0],arr);
+                }
+                else if((access(arr[0],F_OK)!=0) && ((child = fork())== 0)){
+                    //The file does not exist, check for it in the path
+                    //
+                    execv(arr[0],arr);
+                }
+                if(child > 0){
+                    waitpid(child);
                 }
             }
         }
-        if(getpid() != 0){
-            waitpid(child);
+        if(child!=0){
             printf(">>");
         }
     }
