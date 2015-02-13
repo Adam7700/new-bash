@@ -3,80 +3,93 @@
 #include <linux/limits.h>
 #include <sys/types.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define arrLen(a) (sizeof(a) / sizeof(*a))
 
 void parseString(char*, char*[]);
 
 int main(){
-    char input[BUFSIZ];
-//    printf("%d", BUFSIZ);
-    
+    char *arr[20] = {0};
+   
     printf(">>");
 
     while(1){
-        scanf("%s", input);
-        if (strcmp(input,"exit")==0){
+        char input[BUFSIZ];
+        fflush(stdin);
+        fgets(input,BUFSIZ,stdin);
+
+        int len;
+        len = strlen(input);
+        if(input[len-1] == '\n'){
+            input[len-1] = 0;
+        }
+        parseString(input,arr);
+
+        if (strcmp(arr[0],"exit")==0){
             return 0;
+        }
+            
+        char* builtIn[] = {"cd", "pwd", "version"};
+        int isBuiltIn = 0;
+
+        int i;
+        for(i=0; i<arrLen(builtIn); i++){
+            if (strcmp(arr[0], builtIn[i])==0){
+                isBuiltIn = 1;
+                break;
+            }
         }
         pid_t child;
-            
-        if((child = fork()) == 0){
-            char* builtIn[] = {"cd", "pwd", "version"};
-            int isBuiltIn = 0;
-
-            int i;
-            for(i=0; i<arrLen(builtIn); i++){
-                if (strcmp(input, builtIn[i])==0){
-                    isBuiltIn = 1;
-                }
+        
+        if(isBuiltIn){
+            printf("BUILTIN");
+            if(strcmp(arr[0], "version")==0){
+                printf("%s\n","Version: 0.01");
             }
-            
-
-            
-            if(isBuiltIn){
-                if(strcmp(input, "version")==0){
-                    printf("%s\n","Version: 0.01");
-                }
-                else if(strcmp(input, "pwd")==0){
-                   char cwd[PATH_MAX];
-                   char* curPath = getcwd(cwd, sizeof(cwd));
-                   printf("%s\n", curPath);
-                }
-                else if(strcmp(input, "cd")==0){
-                    char inputString[1024] = "cd /there";
-                    char* arr[10];
-                    parseString(inputString,arr );
-                }
+            else if(strcmp(arr[0], "pwd")==0){
+               char cwd[PATH_MAX];
+               char* curPath = getcwd(cwd, sizeof(cwd));
+               printf("%s\n", curPath);
             }
-            else{
-                char *argv[]={input};
-                execv(input,argv);
-
-
+            else if(strcmp(arr[0], "cd")==0){
+                int o;
+                printf("CDING\n");
+                if(arr[1] == 0){
+                    chdir(getenv("HOME"));
+                }else{
+                    printf("CDING\n");
+                    if(strcmp(arr[1],"~")==0){
+                        chdir(getenv("HOME"));
+                    }else{
+                        chdir(arr[1]);
+                    }
+                }
+             
             }
-            return 0;
         }
         else{
+            if((child = fork())==0){
+                // char *argv[]={arr};
+                // execv(input,argv);
+                return 0;
+            }
+        }
+        if(getpid() != 0){
             waitpid(child);
             printf(">>");
         }
-
     }
 }
 
-void parseString(char* inputString, char*arr[]){
-        printf("%s\n", inputString);
-        char *delim = " ";
+void parseString(char* inputString, char *arr[]){
+    char *delim = " ";
     char *currentTok  = strtok (inputString , delim);
-
-
-    while(currentTok!= NULL){
-        printf("%s\n", currentTok);
+    int count=0;
+    while(currentTok){
+        arr[count] = currentTok;
         currentTok = strtok(NULL, delim);
+        count++;
     }
-
-    
     return;
 } 
-
