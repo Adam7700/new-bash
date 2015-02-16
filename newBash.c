@@ -10,17 +10,21 @@
 int parseString(char*, char*[],char*);
 char strLastChr(char *);
 char strFirstChr(char *);
+void nullLastChar(char *);
 
 int main(){
    
+    printf(">> Starting shsh V0.01\n");
     printf(">>");
 
     while(1){
         char input[BUFSIZ];
-        char *arr[20] = {0};
+        char *args[20] = {0};
         fflush(stdin);
         fgets(input,BUFSIZ,stdin);
         int paramLen = 0;
+        int lastIdx = 0;
+        int bg_proc = 0;
         pid_t child = -1;
 
         int len;
@@ -28,58 +32,74 @@ int main(){
         if(input[len-1] == '\n'){
             input[len-1] = 0;
         }
-        paramLen = parseString(input,arr," \t");
+        paramLen = parseString(input,args," \t");
+        lastIdx = paramLen - 1;
+
+
 
         if(paramLen != -1){
-            if (strcmp(arr[0],"exit")==0){
+            if (strcmp(args[0],"exit")==0){
                 return 0;
             }
                 
-            char* builtIn[] = {"cd", "pwd", "version"};
+            if(strLastChr(args[lastIdx])=='&' && paramLen > 0){
+                bg_proc=1;
+                if(strlen(args[lastIdx])==1){
+                    args[lastIdx] = 0;
+                    paramLen -= 1;                    
+                }else{
+                    printf("Passing %s\n",args[lastIdx]);
+                    nullLastChar(args[lastIdx]);
+                }
+            }
+
+            char* builtIn[] = {"cd", "pwd", "version","getpid"};
             int isBuiltIn = 0;
 
             int i;
-            for(i=0; i<arrLen(builtIn); i++){
-                if (strcmp(arr[0], builtIn[i])==0){
+            for(i=0; i< arrLen(builtIn); i++){
+                if (strcmp(args[0], builtIn[i])==0){
                     isBuiltIn = 1;
                     break;
                 }
             }
             
             if(isBuiltIn){
-                if(strcmp(arr[0], "version")==0){
+                if(strcmp(args[0], "version")==0){
                     printf("%s\n","Version: 0.01");
                 }
-                else if(strcmp(arr[0], "pwd")==0){
+                else if(strcmp(args[0], "pwd")==0){
                    char cwd[PATH_MAX];
                    char* curPath = getcwd(cwd, sizeof(cwd));
                    printf("%s\n", curPath);
                 }
-                else if(strcmp(arr[0], "cd")==0){
+                else if(strcmp(args[0], "cd")==0){
                     int o;
-                    if(arr[1] == 0){
+                    if(args[1] == 0){
                         chdir(getenv("HOME"));
                     }else{
-                        if(strcmp(arr[1],"~")==0){
+                        if(strcmp(args[1],"~")==0){
                             chdir(getenv("HOME"));
                         }else{
-                            chdir(arr[1]);
+                            chdir(args[1]);
                         }
                     }
+                }else if(strcmp(args[0],"getpid")==0){
+                    printf("%d\n",getpid());
                 }
             }
-            else if(paramLen > 0 && arr[0] != NULL){
+            else if(paramLen > 0 && args[0] != NULL){
                 int abs_path = 0;
-                if(strFirstChr(arr[0])=='.' || strFirstChr(arr[0])=='/'){
+                if(strFirstChr(args[0])=='.' || strFirstChr(args[0])=='/'){
                     abs_path=1;
                 }
-                if((access(arr[0],F_OK)==0) && (child = fork())==0){
-                    //The file exists, we should try to
-                    // run it.
+                if((access(args[0],F_OK)==0) && (child = fork())==0){
+                    //The file exists in whatever path was provided, 
+                    //  we should try to run it.
                     
-                    execv(arr[0],arr);
+                    execv(args[0],args);
                 }
-                else if((access(arr[0],F_OK)!=0) && !abs_path && ((child = fork())== 0) ){
+                else if((access(args[0],F_OK)!=0) && !abs_path && ((child = fork())== 0) ){
                     //The file does not exist, check for it in the path
                     //
                     char *path_arr[20] = {0};
@@ -91,10 +111,10 @@ int main(){
                         if(strLastChr(path_arr[m]) != '/'){
                             strcat(full_path,"/");
                         }
-                        strcat(full_path,arr[0]);
+                        strcat(full_path,args[0]);
                         if(access(full_path,F_OK)==0){
-                            arr[0] = full_path;
-                            execv(full_path,arr);
+                            args[0] = full_path;
+                            execv(full_path,args);
                             break;
                         }
                     }
@@ -118,12 +138,17 @@ char strLastChr(char  *string){
     return string[strlen(string)-1];
 }
 
-int parseString(char* inputString, char *arr[],char *delim){
+void nullLastChar(char *string){
+    string[strlen(string)-1] = 0;
+    return;
+}
+
+int parseString(char* inputString, char *args[],char *delim){
     if(strlen(inputString) != 0){
         char *currentTok  = strtok (inputString , delim);
         int count=0;
         while(currentTok){
-            arr[count] = currentTok;
+            args[count] = currentTok;
             currentTok = strtok(NULL, delim);
             count++;
         }
