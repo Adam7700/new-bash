@@ -58,7 +58,6 @@ int main(){
                     args[lastIdx] = 0;
                     paramLen -= 1;                    
                 }else{
-                    printf("Passing %s\n",args[lastIdx]);
                     nullLastChar(args[lastIdx]);
                 }
             }
@@ -103,8 +102,7 @@ int main(){
                 if(strFirstChr(args[0])=='.' || strFirstChr(args[0])=='/'){
                     abs_path=1;
                 }
-          //      signal (SIGCHLD, reap_child);
-           //     printf("Past signal.");
+                signal (SIGCHLD, reap_child);
 
                 if((access(args[0],F_OK)==0) && (child = fork())==0){
                     //The file exists in whatever path was provided, 
@@ -137,7 +135,6 @@ int main(){
                         
                     }else{
                         waitpid(child, &status, 0);
-                        waitpid(-1, 0, 0);
                     }
                 }
             }
@@ -151,9 +148,11 @@ int main(){
 
 void reap_child(){
     pid_t pid;
+    int status;
 
-    pid = waitpid (-1, 0, WNOWAIT);
-    printf("Child ready to be reaped\n");
+    while((pid = waitpid (-1, &status, WNOWAIT)) > 0){
+        printf("Reaping child with pid: %d\n",pid);
+    };
     return;
 }
 
