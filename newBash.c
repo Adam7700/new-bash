@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/wait.h>
 
 #define arrLen(a) (sizeof(a) / sizeof(*a))
 
@@ -26,6 +27,10 @@ int main(){
         int lastIdx = 0;
         int bg_proc = 0;
         pid_t child = -1;
+        
+        int status;
+        int* childrenStatus = [10];
+        int numChildren = 0;
 
         int len;
         len = strlen(input);
@@ -119,8 +124,15 @@ int main(){
                         }
                     }
                 }
-                if(child > 0){
-                    waitpid(child);
+                if(child > 0){                
+                    if (bg_proc == 1){
+                        waitpid(child,&status,WNOHANG);
+                        childrenStatus[numChildren]=status;
+                        numChildren++;
+
+                    }else{
+                        waitpid(child, &status, 0);
+                    }
                 }
             }
         }
