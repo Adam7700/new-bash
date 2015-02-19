@@ -4,6 +4,9 @@
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <sys/resource.h>
 
 #define arrLen(a) (sizeof(a) / sizeof(*a))
 
@@ -11,6 +14,7 @@ int parseString(char*, char*[],char*);
 char strLastChr(char *);
 char strFirstChr(char *);
 void nullLastChar(char *);
+void reap_child();
 
 int main(){
    
@@ -27,6 +31,8 @@ int main(){
         int lastIdx = 0;            //Last index of the args that were input
         int bg_proc = 0;            //Keeps track of whether or not to put in bg
         pid_t child = -1;           //Keeps track of the child proc (or parent, depneding)
+        
+        int status;
 
         /*
         //
@@ -97,6 +103,9 @@ int main(){
                 if(strFirstChr(args[0])=='.' || strFirstChr(args[0])=='/'){
                     abs_path=1;
                 }
+          //      signal (SIGCHLD, reap_child);
+           //     printf("Past signal.");
+
                 if((access(args[0],F_OK)==0) && (child = fork())==0){
                     //The file exists in whatever path was provided, 
                     //  we should try to run it.
@@ -122,8 +131,14 @@ int main(){
                         }
                     }
                 }
-                if(child > 0){
-                    waitpid(child);
+                if(child > 0){                
+                    if (bg_proc == 1){
+                        waitpid(child, &status, WNOHANG);
+                        
+                    }else{
+                        waitpid(child, &status, 0);
+                        waitpid(-1, 0, 0);
+                    }
                 }
             }
         }
@@ -131,6 +146,15 @@ int main(){
             printf(">>");
         }
     }
+}
+
+
+void reap_child(){
+    pid_t pid;
+
+    pid = waitpid (-1, 0, WNOWAIT);
+    printf("Child ready to be reaped\n");
+    return;
 }
 
 char strFirstChr(char *string){
