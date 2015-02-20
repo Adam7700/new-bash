@@ -27,29 +27,33 @@ int main(){
     printf(">>");
 
     while(1){
-        char input[BUFSIZ];
-        char *args[20] = {0};
+        
+        char input[BUFSIZ];         //Stores the input string
+        char *args[20] = {0};       //Stores the split of the input string. The "args"
+        int paramLen = 0;           //Keeps track of number of args
         fflush(stdin);
-        fgets(input,BUFSIZ,stdin);
-        int paramLen = 0;
-        int lastIdx = 0;
-        int bg_proc = 0;
-        pid_t child = -1;
+        fgets(input,BUFSIZ,stdin);  //Sets input from stdin
+        int lastIdx = 0;            //Last index of the args that were input
+        int bg_proc = 0;            //Keeps track of whether or not to put in bg
+        pid_t child = -1;           //Keeps track of the child proc (or parent, depneding)
         
         int status;
 
-        int len;
-        len = strlen(input);
-        if(input[len-1] == '\n'){
+        /*
+        //
+        // Setting up facts about input obtained this iteration
+        //
+        */
+        int len = strlen(input);    //lenght of string typed at prompt
+        if(input[len-1] == '\n'){   //Strip newline
             input[len-1] = 0;
         }
-        paramLen = parseString(input,args," \t");
-        lastIdx = paramLen - 1;
 
+        paramLen = parseString(input,args," \t");   //set paramlen
+        lastIdx = paramLen - 1;                     //set last index in args
 
-
-        if(paramLen != -1){
-            if (strcmp(args[0],"exit")==0){
+        if(paramLen != -1){                         //Pressing enter (paramlen == 0) just skips back around
+            if (strcmp(args[0],"exit") == 0){
                 return 0;
             }
                 
@@ -161,8 +165,7 @@ int main(){
                 if(strFirstChr(args[0])=='.' || strFirstChr(args[0])=='/'){
                     abs_path=1;
                 }
-          //      signal (SIGCHLD, reap_child);
-           //     printf("Past signal.");
+                signal (SIGCHLD, reap_child);
 
                 if((access(args[0],F_OK)==0) && (child = fork())==0){
                     //The file exists in whatever path was provided, 
@@ -213,12 +216,11 @@ int main(){
                     }    
                     else{
                         waitpid(child, &status, 0);
-                        waitpid(-1, 0, 0);
                     }
                 }
             }
         }
-        if(child!=0){
+        if(child != 0){
             printf(">>");
         }
     }
@@ -249,9 +251,11 @@ void openStd(int orp, int irp, int oldOut, int oldIn){
 
 void reap_child(){
     pid_t pid;
+    int status;
 
-    pid = waitpid (-1, 0, WNOWAIT);
-    printf("Child ready to be reaped\n");
+    while((pid = waitpid (-1, &status, WNOWAIT)) > 0){
+        printf("Reaping child with pid: %d\n",pid);
+    };
     return;
 }
 

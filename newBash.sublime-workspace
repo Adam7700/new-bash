@@ -1,0 +1,349 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"BACKUP",
+				"BACKUP_ROOT_PATH"
+			],
+			[
+				"scout",
+				"idx_scout"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 240.0,
+		"selected_items":
+		[
+			[
+				"autocom",
+				"Autocomplete file name"
+			],
+			[
+				"open",
+				"File: Open In Browser - Production Server"
+			],
+			[
+				"view",
+				"View In Browser"
+			],
+			[
+				"vie",
+				"View In Browser"
+			],
+			[
+				"install ",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"tag",
+				"Tag: Get CSS Classes"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"proj",
+				"Project: Add Folder"
+			],
+			[
+				"prj",
+				"Project: Save As"
+			],
+			[
+				"project",
+				"Project: Save As"
+			],
+			[
+				"reveal",
+				"File: Reveal"
+			],
+			[
+				"focus file",
+				"Focus File on Sidebar"
+			],
+			[
+				"focus ",
+				"Focus File on Sidebar"
+			],
+			[
+				"focusfi",
+				"Focus File on Sidebar"
+			],
+			[
+				"focus",
+				"Focus File on Sidebar"
+			],
+			[
+				"install pac",
+				"Package Control: Install Package"
+			],
+			[
+				"package",
+				"Preferences: Browse Packages"
+			]
+		],
+		"width": 512.0
+	},
+	"console":
+	{
+		"height": 307.0,
+		"history":
+		[
+			"cls",
+			"Focus File On Sidebar",
+			"import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404' + 'e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/media/nwhite/BOOT/start.elf",
+		"/media/nwhite/BOOT/kernel.img",
+		"/run/user/10023/gvfs/smb-share:server=fileshare.cse.taylor.edu,share=updater,user=updater/active/map_printers/install.bat",
+		"/run/user/10023/gvfs/smb-share:server=fileshare.cse.taylor.edu,share=updater,user=updater/active/HP_Printer_Install_Lp224/install.bat",
+		"/home/CS/faculty/nwhite/.linux/temp_pipe.py",
+		"/home/CS/faculty/nwhite/.linux/nonblock-python.py",
+		"/home/CS/faculty/nwhite/.linux/test-nonblock.py",
+		"/home/CS/faculty/nwhite/.linux/Desktop/ubuntu-env-bak/apt-packages-restore-systemwide.sh",
+		"/home/CS/faculty/nwhite/.linux/Desktop/ubuntu-env-bak/apt-packages-restore.sh",
+		"/home/CS/faculty/nwhite/.linux/Desktop/ubuntu-env-bak/apt-packages-bak.sh",
+		"/home/CS/faculty/nwhite/.linux/Desktop/ubuntu-env-bak/config-home.sh",
+		"/home/CS/faculty/nwhite/.linux/Desktop/ubuntu-env-bak/config.sh",
+		"/home/CS/faculty/nwhite/.linux/Desktop/ubuntu-env-bak/config-apt.sh",
+		"/run/user/10023/gvfs/smb-share:server=fileshare.cse.taylor.edu,share=wshare,user=nwhite/public_html/hello_world/index.html",
+		"/run/user/10023/gvfs/smb-share:server=fileshare.cse.taylor.edu,share=wshare,user=nwhite/Hello World/index.html",
+		"/home/CS/faculty/nwhite/.linux/.config/sublime-text-3/Packages/User/Preferences.sublime-settings",
+		"/home/CS/faculty/nwhite/.linux/Desktop/ubuntu-env-bak/README.md",
+		"/home/CS/faculty/nwhite/.linux/Desktop/ubuntu-env-bak/generic.env.bak/apt-packages-ppas/Package.list",
+		"/home/CS/faculty/nwhite/.linux/Desktop/ubuntu-env-bak/home-restore.sh",
+		"/media/nwhite/15C1-A4D7/install-user.env.bak/apt-packages-bak.sh",
+		"/home/CS/faculty/nwhite/.linux/Desktop/ubuntu-env-bak/home-bak.sh",
+		"/media/nwhite/15C1-A4D7/install-user.env.bak/config.sh",
+		"/media/nwhite/15C1-A4D7/install-user.env.bak/config-home.sh",
+		"/media/nwhite/15C1-A4D7/install-user.env.bak/config-apt.sh",
+		"/media/nwhite/15C1-A4D7/install-user.env.bak/apt-packages-restore.sh",
+		"/media/nwhite/15C1-A4D7/install-user.env.bak/home-bak.sh",
+		"/media/nwhite/15C1-A4D7/install-user.env.bak/home-restore.sh",
+		"/home/CS/faculty/nwhite/.linux/Desktop/learning_angular/app/scripts/app.js",
+		"/home/CS/faculty/nwhite/.linux/Desktop/learning_angular/app/scripts/controllers/main.js",
+		"/home/CS/faculty/nwhite/.linux/Desktop/learning_angular/package.json",
+		"/home/CS/faculty/nwhite/.linux/Desktop/learning_angular/app/index.html",
+		"/home/CS/faculty/nwhite/.linux/Desktop/anthem/package.json",
+		"/home/CS/faculty/nwhite/.linux/Desktop/anthem/npm-debug.log",
+		"/home/CS/faculty/nwhite/.linux/public_html/anthem/package.json",
+		"/home/CS/faculty/nwhite/.linux/public_html/anthem/index.html",
+		"/home/CS/faculty/nwhite/.linux/public_html/anthem/css/main.css",
+		"/home/CS/faculty/nwhite/.linux/.config/sublime-text-3/Packages/View In Browser/View In Browser.sublime-settings",
+		"/home/CS/faculty/nwhite/.linux/.config/sublime-text-3/Packages/User/CSS.sublime-settings",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/learning_angular/egghead-angularjs-from-scratch-getting-started/app/eggly-app.finish.js",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/learning_angular/egghead-angularjs-from-scratch-getting-started/app/test.html",
+		"/home/CS/faculty/nwhite/.linux/.config/sublime-text-3/Packages/User/angular_web_build.sublime-build",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/learning_angular/egghead-angularjs-from-scratch-getting-started/index.start.html",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/learning_angular/egghead-angularjs-from-scratch-getting-started/app/eggly-app.complete.js",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/learning_angular/egghead-angularjs-from-scratch-getting-started/app/common/models/bookmarks-model.js",
+		"/home/CS/faculty/nwhite/.linux/Desktop/parse_to_iptable.pl",
+		"/home/CS/faculty/nwhite/.linux/Desktop/ips",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/learning_angular/egghead-angularjs-from-scratch-getting-started/index.finish.html",
+		"/home/CS/faculty/nwhite/.linux/Desktop/rlog",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/learning_angular/egghead-angularjs-from-scratch-getting-started/app/eggly-app.start.js",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/learning_angular/egghead-angularjs-from-scratch-getting-started/index.complete.html",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/snap.css",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/controllers.js",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/app.js",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/map.css",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/services.js",
+		"/home/CS/faculty/nwhite/.linux/Downloads/Snap.js-develop/demo/apps/ratchet/template.html",
+		"/home/CS/faculty/nwhite/.linux/Downloads/angular-snap.js-master/examples/index.html",
+		"/home/CS/faculty/nwhite/.linux/Downloads/angular-snap.js-master/examples/partials/ex-basic.html",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/bluebird.js",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/lodash.min.js",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/angular-google-maps.min.js",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/angular-seed-master/app/app.js",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/angular-seed-master/app/view1/view1.js",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/angular-seed-master/app/index.html",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/index-rev1.html",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/map-rev1.js",
+		"/home/CS/faculty/nwhite/.linux/Downloads/Snap.js-develop/demo/apps/rightDisabled.html",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/test.html",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/balloon_track/map.html",
+		"/home/CS/faculty/nwhite/.linux/NSL_Projects/nsl_php_apis/coordinates.php"
+	],
+	"find":
+	{
+		"height": 31.0
+	},
+	"find_in_files":
+	{
+		"height": 95.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"console",
+			"CASE_INSTALL",
+			"CASE",
+			".\"\"\"",
+			"maya",
+			"ng-class",
+			"61.174.50.25",
+			"61.174.50.2",
+			"form",
+			"font-size",
+			"text",
+			".content",
+			"snap.js",
+			"content",
+			"updateDrawers",
+			"ng-app",
+			"javascript",
+			"bool_auto",
+			"bool_info",
+			"bool_extrap",
+			"bounds"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 31.0
+	},
+	"input":
+	{
+		"height": 36.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"project": "newBash.sublime-project",
+	"replace":
+	{
+		"height": 58.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"map",
+				"~/NSL_Projects/balloon_track/map.css"
+			],
+			[
+				"map.",
+				"~/NSL_Projects/balloon_track/map.css"
+			],
+			[
+				"snap",
+				"~/NSL_Projects/balloon_track/snap.css"
+			],
+			[
+				"apps",
+				"~/NSL_Projects/balloon_track/app.js"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 148.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
