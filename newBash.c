@@ -7,6 +7,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <sys/resource.h>
+#include <fcntl.h>
 
 #define arrLen(a) (sizeof(a) / sizeof(*a))
 
@@ -15,6 +16,10 @@ char strLastChr(char *);
 char strFirstChr(char *);
 void nullLastChar(char *);
 void reap_child();
+void openStd(int, int, int, int);
+void newStdin(char*);
+void newStdout(char*);
+
 
 int main(){
    
@@ -52,12 +57,24 @@ int main(){
                 bg_proc=1;
                 if(strlen(args[lastIdx])==1){
                     args[lastIdx] = 0;
-                    paramLen -= 1;                    
+                    paramLen -= 1;
+                    lastIdx -=1;
                 }else{
-                    printf("Passing %s\n",args[lastIdx]);
                     nullLastChar(args[lastIdx]);
                 }
             }
+            int inputRedirectPos;
+            int redirectCheck;
+            int outputRedirectPos;
+            for(redirectCheck=0; redirectCheck<paramLen; redirectCheck++){
+                if (strcmp(args[redirectCheck], "<")==0){
+                    inputRedirectPos = redirectCheck;
+                }
+                if (strcmp(args[redirectCheck],">")==0){ 
+                    outputRedirectPos = redirectCheck;
+                }
+            }
+
 
             char* builtIn[] = {"cd", "pwd", "version","getpid"};
             int isBuiltIn = 0;
@@ -69,6 +86,41 @@ int main(){
                     break;
                 }
             }
+            char* stdoutFile;
+            char* stdinFile;
+            if(inputRedirectPos || outputRedirectPos){
+                if(inputRedirectPos){
+              //      stdinCpy = dup(0);
+                    stdinFile = args[inputRedirectPos+1];
+                    if(outputRedirectPos && outputRedirectPos > inputRedirectPos){
+                        outputRedirectPos -=2;
+                    }
+                    int newPos;
+                    for(newPos=inputRedirectPos; newPos<paramLen-2; newPos++){
+                        args[newPos]=args[newPos+2];
+                    }
+                    args[newPos+1]=0;
+                    args[newPos+2]=0;
+                    paramLen -= 2;
+                } 
+                if (outputRedirectPos){
+                    stdoutFile = args[outputRedirectPos+1];
+           //         stdoutCpy = dup(1); 
+                    
+                    int newPosOut;
+                    for(newPosOut=outputRedirectPos; newPosOut<paramLen-2; newPosOut++){
+                        args[newPosOut]=args[newPosOut+2];
+                    }
+                    if(paramLen == 3){
+                        args[newPosOut] = 0;
+                    }
+                    args[newPosOut+1]=0;
+                    args[newPosOut+2]=0;
+                    paramLen -=2;
+                    
+                }
+            }
+
             
             if(isBuiltIn){
                 if(strcmp(args[0], "version")==0){
@@ -92,8 +144,18 @@ int main(){
                     }
                 }else if(strcmp(args[0],"getpid")==0){
                     printf("%d\n",getpid());
+
                 }
+               // openStd(outputRedirectPos, inputRedirectPos, stdoutCpy, stdinCpy); 
+               if(inputRedirectPos){
+                   newStdin(stdinFile); 
+               } 
+               if(outputRedirectPos){
+                   newStdout(stdoutFile);
+               }
+
             }
+
             else if(paramLen > 0 && args[0] != NULL){
                 int abs_path = 0;
                 if(strFirstChr(args[0])=='.' || strFirstChr(args[0])=='/'){
@@ -105,8 +167,16 @@ int main(){
                 if((access(args[0],F_OK)==0) && (child = fork())==0){
                     //The file exists in whatever path was provided, 
                     //  we should try to run it.
-                    
+                 if(inputRedirectPos){
+                     newStdin(stdinFile); 
+                 } 
+                 if(outputRedirectPos){
+                     newStdout(stdoutFile);
+                 }
+   
                     execv(args[0],args);
+              //      openStd(outputRedirectPos, inputRedirectPos, stdoutCpy, stdinCpy); 
+
                 }
                 else if((access(args[0],F_OK)!=0) && !abs_path && ((child = fork())== 0) ){
                     //The file does not exist, check for it in the path
@@ -123,16 +193,25 @@ int main(){
                         strcat(full_path,args[0]);
                         if(access(full_path,F_OK)==0){
                             args[0] = full_path;
+
+                            if(inputRedirectPos){
+                               newStdin(stdinFile); 
+                            } 
+                            if(outputRedirectPos){
+                                newStdout(stdoutFile);
+                            }
                             execv(full_path,args);
+                         //   openStd(outputRedirectPos, inputRedirectPos, stdoutCpy, stdinCpy);
                             break;
                         }
                     }
                 }
+                
                 if(child > 0){                
                     if (bg_proc == 1){
                         waitpid(child, &status, WNOHANG);
-                        
-                    }else{
+                    }    
+                    else{
                         waitpid(child, &status, 0);
                         waitpid(-1, 0, 0);
                     }
@@ -145,6 +224,28 @@ int main(){
     }
 }
 
+void newStdin(char* file){
+    close(0);
+    open(file, O_RDONLY);
+}
+
+void newStdout(char* file){
+
+     close(1);       
+     open(file, O_WRONLY | O_CREAT, S_IRWXU | S_IRGRP | S_IWGRP| S_IXOTH); 
+}
+
+void openStd(int orp, int irp, int oldOut, int oldIn){
+    if(orp){
+        printf("at openStd");
+        close(1);
+        dup2(oldOut, 1);
+    }
+    if(irp){
+        close(0);
+        dup2(oldIn, 0);
+    }
+}
 
 void reap_child(){
     pid_t pid;
@@ -179,4 +280,5 @@ int parseString(char* inputString, char *args[],char *delim){
         return count;
     }
     return -1;
-} 
+}
+
