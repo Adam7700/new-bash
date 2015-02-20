@@ -67,65 +67,7 @@ int main(){
                     nullLastChar(args[lastIdx]);
                 }
             }
-            int inputRedirectPos;
-            int redirectCheck;
-            int outputRedirectPos;
-            for(redirectCheck=0; redirectCheck<paramLen; redirectCheck++){
-                if (strcmp(args[redirectCheck], "<")==0){
-                    inputRedirectPos = redirectCheck;
-                }
-                if (strcmp(args[redirectCheck],">")==0){ 
-                    outputRedirectPos = redirectCheck;
-                }
-            }
-
-
-            char* builtIn[] = {"cd", "pwd", "version","getpid"};
-            int isBuiltIn = 0;
-
-            int i;
-            for(i=0; i< arrLen(builtIn); i++){
-                if (strcmp(args[0], builtIn[i])==0){
-                    isBuiltIn = 1;
-                    break;
-                }
-            }
-            char* stdoutFile;
-            char* stdinFile;
-            if(inputRedirectPos || outputRedirectPos){
-                if(inputRedirectPos){
-              //      stdinCpy = dup(0);
-                    stdinFile = args[inputRedirectPos+1];
-                    if(outputRedirectPos && outputRedirectPos > inputRedirectPos){
-                        outputRedirectPos -=2;
-                    }
-                    int newPos;
-                    for(newPos=inputRedirectPos; newPos<paramLen-2; newPos++){
-                        args[newPos]=args[newPos+2];
-                    }
-                    args[newPos+1]=0;
-                    args[newPos+2]=0;
-                    paramLen -= 2;
-                } 
-                if (outputRedirectPos){
-                    stdoutFile = args[outputRedirectPos+1];
-           //         stdoutCpy = dup(1); 
-                    
-                    int newPosOut;
-                    for(newPosOut=outputRedirectPos; newPosOut<paramLen-2; newPosOut++){
-                        args[newPosOut]=args[newPosOut+2];
-                    }
-                    if(paramLen == 3){
-                        args[newPosOut] = 0;
-                    }
-                    args[newPosOut+1]=0;
-                    args[newPosOut+2]=0;
-                    paramLen -=2;
-                    
-                }
-            }
-
-            
+                     
             if(isBuiltIn){
                 if(strcmp(args[0], "version")==0){
                     printf("%s\n","Version: 0.01");
@@ -273,16 +215,84 @@ void nullLastChar(char *string){
 }
 
 int parseString(char* inputString, char *args[],char *delim){
+
     if(strlen(inputString) != 0){
         char *currentTok  = strtok (inputString , delim);
         int count=0;
         while(currentTok){
-            args[count] = currentTok;
+            if((strcmp(currentTok,">"))==0 || (strcmp(currentTok,"<"))==0){
+                if((strcmp(currentTok,">"))==0){
+                    orf = 1;
+                }else{
+
+                }
+            }else{
+                args[count] = currentTok;
+                count++;
+            }
             currentTok = strtok(NULL, delim);
-            count++;
         }
         return count;
     }
     return -1;
 }
 
+
+
+   int inputRedirectPos;
+            int redirectCheck;
+            int outputRedirectPos;
+            for(redirectCheck=0; redirectCheck<paramLen; redirectCheck++){
+                if (strcmp(args[redirectCheck], "<")==0){
+                    inputRedirectPos = redirectCheck;
+                }
+                if (strcmp(args[redirectCheck],">")==0){ 
+                    outputRedirectPos = redirectCheck;
+                }
+            }
+
+
+            char* builtIn[] = {"cd", "pwd", "version","getpid"};
+            int isBuiltIn = 0;
+
+            int i;
+            for(i=0; i< arrLen(builtIn); i++){
+                if (strcmp(args[0], builtIn[i])==0){
+                    isBuiltIn = 1;
+                    break;
+                }
+            }
+            char* stdoutFile;
+            char* stdinFile;
+            if(inputRedirectPos || outputRedirectPos){
+                if(inputRedirectPos){
+              //      stdinCpy = dup(0);
+                    stdinFile = args[inputRedirectPos+1];
+                    if(outputRedirectPos && outputRedirectPos > inputRedirectPos){
+                        outputRedirectPos -=2;
+                    }
+                    int newPos;
+                    for(newPos=inputRedirectPos; newPos<paramLen-2; newPos++){
+                        args[newPos]=args[newPos+2];
+                    }
+                    args[newPos+1]=0;
+                    args[newPos+2]=0;
+                    paramLen -= 2;
+                } 
+                if (outputRedirectPos){
+                    stdoutFile = args[outputRedirectPos+1];
+           //         stdoutCpy = dup(1); 
+                    
+                    int newPosOut;
+                    for(newPosOut=outputRedirectPos; newPosOut<paramLen-2; newPosOut++){
+                        args[newPosOut]=args[newPosOut+2];
+                    }
+                    if(paramLen == 3){
+                        args[newPosOut] = 0;
+                    }
+                    args[newPosOut+1]=0;
+                    args[newPosOut+2]=0;
+                    paramLen -=2;
+                    
+                }
+            }
