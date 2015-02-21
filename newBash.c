@@ -11,7 +11,7 @@
 
 #define arrLen(a) (sizeof(a) / sizeof(*a))
 
-int parseString(char*, char*[],char*,char*,char*);
+int parseString(char*, char*[],char*,char*,char*,char*[]);
 char strLastChr(char *);
 char strFirstChr(char *);
 void nullLastChar(char *);
@@ -21,23 +21,30 @@ void newStdin(char*);
 void newStdout(char*);
 
 
-int main(){
-   
-    printf(">> Starting shsh V0.01\n");
+int main(int argc,char **argv){
+    int i;
+    for(i=0; i<argc; i++){
+        printf("argv: %s", argv[i]);
+    }
+    printf(">>Starting shsh V0.01\n");
     printf(">>");
 
     while(1){
         
-        char input[BUFSIZ];         //Stores the input string
-        char *args[20] = {0};       //Stores the split of the input string. The "args"
-        int paramLen = 0;           //Keeps track of number of args
+        char input[BUFSIZ];               //Stores the input string
+        char *args[20]      = {0};        //Stores the split of the input string. The "args"
+        char *pipeArgs[20]  = {0};
+        int paramLen        = 0;          //Keeps track of number of args
         fflush(stdin);
         fgets(input,BUFSIZ,stdin);  //Sets input from stdin
-        int lastIdx = 0;            //Last index of the args that were input
-        int bg_proc = 0;            //Keeps track of whether or not to put in bg
-        pid_t child = -1;           //Keeps track of the child proc (or parent, depneding)
-        char ird[BUFSIZ] = "";
-        char ord[BUFSIZ] = "";
+        int lastIdx         = 0;            //Last index of the args that were input
+        int bg_proc         = 0;            //Keeps track of whether or not to put in bg
+        int piping          = 0;
+        int foundPipe       = 0;
+        pid_t child         = -1;           //Keeps track of the child proc (or parent, depneding)
+        char ird[BUFSIZ]    = "";
+        char ord[BUFSIZ]    = "";
+        int pipeFd[2];
         
         int status;
 
@@ -51,11 +58,15 @@ int main(){
             input[len-1] = 0;
         }
 
+
         char* builtIn[] = {"cd", "pwd", "version","getpid"};
         int isBuiltIn = 0;
 
-        paramLen = parseString(input,args," \t",ird,ord);   //set paramlen
+        paramLen = parseString(input,args," \t",ird,ord,pipeArgs);   //set paramlen
         lastIdx = paramLen - 1;                             //set last index in args
+
+        piping = argc;                  //Should only be > 0 if in a cild with piping
+
 
         if(paramLen != -1){                                 //Pressing enter (paramlen == 0) just skips back around
             if (strcmp(args[0],"exit") == 0){
@@ -112,13 +123,26 @@ int main(){
                 if((child = fork()) == 0){
                     if(ird[0] != '\0'){newStdin(ird);}
                     if(ord[0] != '\0'){newStdout(ord);}
-                    int retval = execvp(args[0],args);
-                    if(retval != 0){
-                        printf("Apologies, command %s not found!.\n",args[0]);
-                        return;
+
+
+                    if(pipeArgs[0]!= NULL){
+                        printf("In pipe args\n");
+                        pipe(pipeFd);
+                        //close(pipeFd[1]);
+                        close(1);
+                        dup(pipeFd[1]);
                     }
-                }
-                if(child > (pid_t) 0){                
+                    int retval = execvp(args[0],args);
+                    if (pipeArgs[0]!= NULL){
+                        strcpy(pipeArgs[0], argv[0]);
+                        execvp(argv[0], pipeArgs);
+                    }
+
+                    if(retval != 0){
+                        printf("Apologies, command %s not found!\n",args[0]);
+                    }
+                    return;
+                }else if(child > (pid_t) 0){                
                     if (bg_proc == 1){
                         waitpid(child, &status, WNOHANG);
                     }    
@@ -127,8 +151,6 @@ int main(){
                     }
                 }
             }
-        }else if(child == (pid_t) -1){
-            printf("Failed to fork child process.\n");
         }
         if(child != 0){
             printf(">>");
@@ -181,12 +203,13 @@ void nullLastChar(char *string){
     return;
 }
 
-int parseString(char* inputString, char *args[],char *delim,char *ird,char *ord){
-    //TODO: Maybe also do the piping stuff in here
+int parseString(char* inputString, char *args[],char *delim,char *ird,char *ord,char *pipeArgs[]){
     if(strlen(inputString) != 0){
         int leaveNextOut=0;
         char *currentTok  = strtok (inputString , delim);
         int count=0;
+        int pipeArgCount=1;
+        int foundPipe=0;
         while(currentTok){
             if((strcmp(currentTok,">"))==0){
                 leaveNextOut=1;
@@ -194,7 +217,13 @@ int parseString(char* inputString, char *args[],char *delim,char *ird,char *ord)
             }else if((strcmp(currentTok,"<"))==0){
                 leaveNextOut=1;
                 strcpy(ird,"<");
-            }else if(!leaveNextOut){
+            }else if((strcmp(currentTok,"|"))==0 || foundPipe){
+                if(!(foundPipe == 0)){
+                    pipeArgs[pipeArgCount] = currentTok;
+                    pipeArgCount++;
+                }
+                foundPipe++;
+            }else if(!leaveNextOut && !foundPipe){
                 args[count] = currentTok;
                 count++;
             }else if(leaveNextOut && strcmp(ird,"<") == 0){
