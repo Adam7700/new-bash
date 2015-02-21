@@ -106,12 +106,10 @@ int main(){
                 }else if(strcmp(args[0],"getpid")==0){
                     printf("%d\n",getpid());
                 }
-            }
+            }else if(paramLen > 0 && args[0] != NULL){
 
-            else if(paramLen > 0 && args[0] != NULL){
-
-                signal (SIGCHLD, reap_child);
-                if((child = fork())==0){
+                signal(SIGCHLD, reap_child);
+                if((child = fork()) == 0){
                     if(ird[0] != '\0'){newStdin(ird);}
                     if(ord[0] != '\0'){newStdout(ord);}
                     int retval = execvp(args[0],args);
@@ -120,8 +118,7 @@ int main(){
                         return;
                     }
                 }
-                
-                if(child > 0){                
+                if(child > (pid_t) 0){                
                     if (bg_proc == 1){
                         waitpid(child, &status, WNOHANG);
                     }    
@@ -130,6 +127,8 @@ int main(){
                     }
                 }
             }
+        }else if(child == (pid_t) -1){
+            printf("Failed to fork child process.\n");
         }
         if(child != 0){
             printf(">>");
@@ -183,7 +182,7 @@ void nullLastChar(char *string){
 }
 
 int parseString(char* inputString, char *args[],char *delim,char *ird,char *ord){
-
+    //TODO: Maybe also do the piping stuff in here
     if(strlen(inputString) != 0){
         int leaveNextOut=0;
         char *currentTok  = strtok (inputString , delim);
