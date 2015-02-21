@@ -11,7 +11,7 @@
 
 #define arrLen(a) (sizeof(a) / sizeof(*a))
 
-int parseString(char*, char*[],char*);
+int parseString(char*, char*[],char*,char*,char*);
 char strLastChr(char *);
 char strFirstChr(char *);
 void nullLastChar(char *);
@@ -36,6 +36,8 @@ int main(){
         int lastIdx = 0;            //Last index of the args that were input
         int bg_proc = 0;            //Keeps track of whether or not to put in bg
         pid_t child = -1;           //Keeps track of the child proc (or parent, depneding)
+        char ird[BUFSIZ] = "";
+        char ord[BUFSIZ] = "";
         
         int status;
 
@@ -49,25 +51,36 @@ int main(){
             input[len-1] = 0;
         }
 
-        paramLen = parseString(input,args," \t");   //set paramlen
-        lastIdx = paramLen - 1;                     //set last index in args
+        char* builtIn[] = {"cd", "pwd", "version","getpid"};
+        int isBuiltIn = 0;
 
-        if(paramLen != -1){                         //Pressing enter (paramlen == 0) just skips back around
+        paramLen = parseString(input,args," \t",ird,ord);   //set paramlen
+        lastIdx = paramLen - 1;                             //set last index in args
+
+        if(paramLen != -1){                                 //Pressing enter (paramlen == 0) just skips back around
             if (strcmp(args[0],"exit") == 0){
                 return 0;
             }
                 
-            if(strLastChr(args[lastIdx])=='&' && paramLen > 0){
-                bg_proc=1;
-                if(strlen(args[lastIdx])==1){
+            if(strLastChr(args[lastIdx])=='&' && paramLen >= 1){
+                bg_proc=1;                                  //Set flag so proc will run in bg
+                if(strlen(args[lastIdx]) == 1){
                     args[lastIdx] = 0;
-                    paramLen -= 1;
-                    lastIdx -=1;
+                    paramLen     -= 1;
+                    lastIdx      -= 1;
                 }else{
-                    nullLastChar(args[lastIdx]);
+                    nullLastChar(args[lastIdx]);            //Null out ampersand
                 }
             }
                      
+            int i;
+            for(i=0; i< arrLen(builtIn); i++){
+                if (strcmp(args[0], builtIn[i])==0){
+                    isBuiltIn = 1;
+                    break;
+                }
+            }
+
             if(isBuiltIn){
                 if(strcmp(args[0], "version")==0){
                     printf("%s\n","Version: 0.01");
@@ -76,6 +89,8 @@ int main(){
                    char cwd[PATH_MAX];
                    char* curPath = getcwd(cwd, sizeof(cwd));
                    printf("%s\n", curPath);
+                   // if(ird[0] != '\0'){newStdin(ird);}
+                   // if(ord[0] != '\0'){newStdout(ord);}
                 }
                 else if(strcmp(args[0], "cd")==0){
                     int o;
@@ -90,16 +105,7 @@ int main(){
                     }
                 }else if(strcmp(args[0],"getpid")==0){
                     printf("%d\n",getpid());
-
                 }
-               // openStd(outputRedirectPos, inputRedirectPos, stdoutCpy, stdinCpy); 
-               if(inputRedirectPos){
-                   newStdin(stdinFile); 
-               } 
-               if(outputRedirectPos){
-                   newStdout(stdoutFile);
-               }
-
             }
 
             else if(paramLen > 0 && args[0] != NULL){
@@ -112,22 +118,15 @@ int main(){
                 if((access(args[0],F_OK)==0) && (child = fork())==0){
                     //The file exists in whatever path was provided, 
                     //  we should try to run it.
-                 if(inputRedirectPos){
-                     newStdin(stdinFile); 
-                 } 
-                 if(outputRedirectPos){
-                     newStdout(stdoutFile);
-                 }
-   
+                    if(ird[0] != '\0'){newStdin(ird);}
+                    if(ord[0] != '\0'){newStdout(ord);}
                     execv(args[0],args);
-              //      openStd(outputRedirectPos, inputRedirectPos, stdoutCpy, stdinCpy); 
-
                 }
                 else if((access(args[0],F_OK)!=0) && !abs_path && ((child = fork())== 0) ){
                     //The file does not exist, check for it in the path
                     //
                     char *path_arr[20] = {0};
-                    int path_count = parseString(getenv("PATH"),path_arr,":");
+                    int path_count = parseString(getenv("PATH"),path_arr,":",NULL,NULL);
                     int m;
                     for(m=0;m<path_count;m++){
                         char full_path[256];
@@ -138,15 +137,9 @@ int main(){
                         strcat(full_path,args[0]);
                         if(access(full_path,F_OK)==0){
                             args[0] = full_path;
-
-                            if(inputRedirectPos){
-                               newStdin(stdinFile); 
-                            } 
-                            if(outputRedirectPos){
-                                newStdout(stdoutFile);
-                            }
+                            if(ird[0] != '\0'){newStdin(ird);}
+                            if(ord[0] != '\0'){newStdout(ord);}
                             execv(full_path,args);
-                         //   openStd(outputRedirectPos, inputRedirectPos, stdoutCpy, stdinCpy);
                             break;
                         }
                     }
@@ -174,7 +167,6 @@ void newStdin(char* file){
 }
 
 void newStdout(char* file){
-
      close(1);       
      open(file, O_WRONLY | O_CREAT, S_IRWXU | S_IRGRP | S_IWGRP| S_IXOTH); 
 }
@@ -214,21 +206,28 @@ void nullLastChar(char *string){
     return;
 }
 
-int parseString(char* inputString, char *args[],char *delim){
+int parseString(char* inputString, char *args[],char *delim,char *ird,char *ord){
 
     if(strlen(inputString) != 0){
+        int leaveNextOut=0;
         char *currentTok  = strtok (inputString , delim);
         int count=0;
         while(currentTok){
-            if((strcmp(currentTok,">"))==0 || (strcmp(currentTok,"<"))==0){
-                if((strcmp(currentTok,">"))==0){
-                    orf = 1;
-                }else{
-
-                }
-            }else{
+            if((strcmp(currentTok,">"))==0){
+                leaveNextOut=1;
+                strcpy(ord,">");
+            }else if((strcmp(currentTok,"<"))==0){
+                leaveNextOut=1;
+                strcpy(ird,"<");
+            }else if(!leaveNextOut){
                 args[count] = currentTok;
                 count++;
+            }else if(leaveNextOut && strcmp(ird,"<") == 0){
+                leaveNextOut = 0;
+                strcpy(ird,currentTok);
+            }else if(leaveNextOut && strcmp(ord,">") == 0){
+                leaveNextOut = 0;
+                strcpy(ord,currentTok);
             }
             currentTok = strtok(NULL, delim);
         }
@@ -236,63 +235,3 @@ int parseString(char* inputString, char *args[],char *delim){
     }
     return -1;
 }
-
-
-
-   int inputRedirectPos;
-            int redirectCheck;
-            int outputRedirectPos;
-            for(redirectCheck=0; redirectCheck<paramLen; redirectCheck++){
-                if (strcmp(args[redirectCheck], "<")==0){
-                    inputRedirectPos = redirectCheck;
-                }
-                if (strcmp(args[redirectCheck],">")==0){ 
-                    outputRedirectPos = redirectCheck;
-                }
-            }
-
-
-            char* builtIn[] = {"cd", "pwd", "version","getpid"};
-            int isBuiltIn = 0;
-
-            int i;
-            for(i=0; i< arrLen(builtIn); i++){
-                if (strcmp(args[0], builtIn[i])==0){
-                    isBuiltIn = 1;
-                    break;
-                }
-            }
-            char* stdoutFile;
-            char* stdinFile;
-            if(inputRedirectPos || outputRedirectPos){
-                if(inputRedirectPos){
-              //      stdinCpy = dup(0);
-                    stdinFile = args[inputRedirectPos+1];
-                    if(outputRedirectPos && outputRedirectPos > inputRedirectPos){
-                        outputRedirectPos -=2;
-                    }
-                    int newPos;
-                    for(newPos=inputRedirectPos; newPos<paramLen-2; newPos++){
-                        args[newPos]=args[newPos+2];
-                    }
-                    args[newPos+1]=0;
-                    args[newPos+2]=0;
-                    paramLen -= 2;
-                } 
-                if (outputRedirectPos){
-                    stdoutFile = args[outputRedirectPos+1];
-           //         stdoutCpy = dup(1); 
-                    
-                    int newPosOut;
-                    for(newPosOut=outputRedirectPos; newPosOut<paramLen-2; newPosOut++){
-                        args[newPosOut]=args[newPosOut+2];
-                    }
-                    if(paramLen == 3){
-                        args[newPosOut] = 0;
-                    }
-                    args[newPosOut+1]=0;
-                    args[newPosOut+2]=0;
-                    paramLen -=2;
-                    
-                }
-            }
