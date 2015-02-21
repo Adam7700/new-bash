@@ -109,39 +109,15 @@ int main(){
             }
 
             else if(paramLen > 0 && args[0] != NULL){
-                int abs_path = 0;
-                if(strFirstChr(args[0])=='.' || strFirstChr(args[0])=='/'){
-                    abs_path=1;
-                }
-                signal (SIGCHLD, reap_child);
 
-                if((access(args[0],F_OK)==0) && (child = fork())==0){
-                    //The file exists in whatever path was provided, 
-                    //  we should try to run it.
+                signal (SIGCHLD, reap_child);
+                if((child = fork())==0){
                     if(ird[0] != '\0'){newStdin(ird);}
                     if(ord[0] != '\0'){newStdout(ord);}
-                    execv(args[0],args);
-                }
-                else if((access(args[0],F_OK)!=0) && !abs_path && ((child = fork())== 0) ){
-                    //The file does not exist, check for it in the path
-                    //
-                    char *path_arr[20] = {0};
-                    int path_count = parseString(getenv("PATH"),path_arr,":",NULL,NULL);
-                    int m;
-                    for(m=0;m<path_count;m++){
-                        char full_path[256];
-                        strcpy(full_path,path_arr[m]);
-                        if(strLastChr(path_arr[m]) != '/'){
-                            strcat(full_path,"/");
-                        }
-                        strcat(full_path,args[0]);
-                        if(access(full_path,F_OK)==0){
-                            args[0] = full_path;
-                            if(ird[0] != '\0'){newStdin(ird);}
-                            if(ord[0] != '\0'){newStdout(ord);}
-                            execv(full_path,args);
-                            break;
-                        }
+                    int retval = execvp(args[0],args);
+                    if(retval != 0){
+                        printf("Apologies, command %s not found!.\n",args[0]);
+                        return;
                     }
                 }
                 
