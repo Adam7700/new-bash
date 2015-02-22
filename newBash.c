@@ -22,9 +22,10 @@ void newStdout(char*);
 
 
 int main(int argc,char **argv){
+    
     int i;
     for(i=0; i<argc; i++){
-        printf("argv: %s", argv[i]);
+        printf("argv: %s\n", argv[i]);
     }
     printf(">>Starting shsh V0.01\n");
     printf(">>");
@@ -40,7 +41,8 @@ int main(int argc,char **argv){
         int lastIdx         = 0;            //Last index of the args that were input
         int bg_proc         = 0;            //Keeps track of whether or not to put in bg
         int piping          = 0;
-        int foundPipe       = 0;
+        int save_stdout     = -1;
+        int save_stdin      = -1;
         pid_t child         = -1;           //Keeps track of the child proc (or parent, depneding)
         char ird[BUFSIZ]    = "";
         char ord[BUFSIZ]    = "";
@@ -65,7 +67,9 @@ int main(int argc,char **argv){
         paramLen = parseString(input,args," \t",ird,ord,pipeArgs);   //set paramlen
         lastIdx = paramLen - 1;                             //set last index in args
 
-        piping = argc;                  //Should only be > 0 if in a cild with piping
+        if(argc > 1){ 
+            piping = 1;
+        };                  
 
 
         if(paramLen != -1){                                 //Pressing enter (paramlen == 0) just skips back around
@@ -91,7 +95,6 @@ int main(int argc,char **argv){
                     break;
                 }
             }
-
             if(isBuiltIn){
                 if(strcmp(args[0], "version")==0){
                     printf("%s\n","Version: 0.01");
@@ -120,24 +123,14 @@ int main(int argc,char **argv){
             }else if(paramLen > 0 && args[0] != NULL){
 
                 signal(SIGCHLD, reap_child);
-                if((child = fork()) == 0){
+                if(pipeArgs[1] != NULL){
+                    pipe(pipeFd);
+                }
+                if(!piping && (child = fork()) == 0){
                     if(ird[0] != '\0'){newStdin(ird);}
                     if(ord[0] != '\0'){newStdout(ord);}
-
-
-                    if(pipeArgs[0]!= NULL){
-                        printf("In pipe args\n");
-                        pipe(pipeFd);
-                        //close(pipeFd[1]);
-                        close(1);
-                        dup(pipeFd[1]);
-                    }
+                    
                     int retval = execvp(args[0],args);
-                    if (pipeArgs[0]!= NULL){
-                        strcpy(pipeArgs[0], argv[0]);
-                        execvp(argv[0], pipeArgs);
-                    }
-
                     if(retval != 0){
                         printf("Apologies, command %s not found!\n",args[0]);
                     }
@@ -149,6 +142,9 @@ int main(int argc,char **argv){
                     else{
                         waitpid(child, &status, 0);
                     }
+                }
+                if(pipeArgs[1] != NULL){
+
                 }
             }
         }
